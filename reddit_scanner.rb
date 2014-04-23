@@ -7,6 +7,10 @@ require './youtube_access'
 require './comment_generator'
 
 ###
+# Wait-time Constants
+SECONDS_BETWEEN_ITERATIONS = 300
+SECONDS_BETWEEN_COMMENTS = 5
+SECONDS_BEFORE_RETRY = 20
 
 # establish username and password
 username = "YouToobBot"
@@ -51,17 +55,34 @@ initial_time = last_time = Time.new
 already_viewed = Array.new 50, nil
 counter = 0
 new_links_count = 0
+youtube = YouTubeAccess.new
 
 # repeat loop, wait for some time, repeat
 while true
   # wait before making next request
   # sleep( 60 * minutes_to_wait )
-  sleep 10
-  puts "\n#{ counter+=1 } iterations. #{ Time.new - last_time - 10 } seconds passed."
+  # sleep 200 if counter > 0 # 2.5 minutes wait time
+  print "Next iteration in    "
+  countdown = SECONDS_BETWEEN_ITERATIONS # seconds between iterations
+  print "\b\b\b#{countdown}#{" "*((-1*countdown.to_s.size)%3)}" or sleep 1 while (countdown -= 1) > 0
+
+  puts "\n\n#{ counter+=1 } iterations. #{ Time.new - last_time } seconds passed."
   last_time = Time.new
+  puts "Current time: #{last_time}"
 
   # retrieve new posts up until first instance of last group of posts retrieved
-  links_list = RedditKit.links(videos_subreddit, category: :new, limit: 25).to_a
+  begin
+    links_list = RedditKit.links(videos_subreddit, category: :new, limit: 20).to_a
+  rescue RedditKit::TimedOut => err
+    puts "Error: RedditKit::TimedOut ...waiting for 60 seconds then retrying"
+    sleep 60
+    retry
+  rescue RedditKit::RequestError => err
+    puts "Error: RedditKit::RequestError ...waiting for 60 seconds then retrying"
+    sleep 60
+    retry
+  end
+  sleep 5
 
   # remove link from list if it's already been viewed
   links_list.delete_if { |link| already_viewed.include? link }
@@ -77,38 +98,32 @@ while true
   # iterate through newly retrieved links
   puts "\tNew links found: #{links_list.size}"
   links_list.reverse_each do |link|
-    # send to youtube_access.rb, use URL to get data and return as hash
-    # send hash to comment_generator.rb (or method here) to format the data into comment string
-    # finally post comment to link's comments section on reddit
     already_viewed.pop
     already_viewed.unshift link
-    puts "\t\t#{link.domain}\t#{link.title}"
+    # send to youtube_access.rb, use URL to get data and return as hash
+    response = youtube.get_video_info(link.url)
+    next if response.nil?
+    # send hash to comment_generator.rb to format the data into comment string
+    comment = CommentGenerator.generate_comment(response, link.url)
+    next if comment.nil?
+    # finally post comment to link's comments section on reddit
+    try_count = 0
+    begin
+      comment_obj = RedditKit.submit_comment(link, comment)
+      puts "******* SUCCESSFULLY POSTED COMMENT TO \"#{link.title}\"" unless comment_obj.nil?
+      #puts "\t\tComment:\n#{comment}"
+    rescue RedditKit::RateLimited 
+      puts "Retrying for link #{link.title}"
+      # give it a minute
+      sleep SECONDS_BEFORE_RETRY
+      retry if (try_count += 1) < 3
+    rescue NoMethodError
+      puts "NoMethodError encountered on #{link.title}"
+      puts "Continuing..."
+    end
+    sleep SECONDS_BETWEEN_COMMENTS
   end
+  puts "----END OF ITERATION----"
 end
-
-
-###
-# pseudocode / notes
-#
-# retrieve videos:
-# videos_list = RedditKit.links(vids, { limit: x, time: 
-# sleep 2 between requests
-#
-# repeat once each hour
-#   retrieve list of 300 (or how many ever) top posts of day
-#   for each post
-#     if is on list of already_commented, break
-#     else, do the following:
-#     check that url is valid youtube
-#     send url to youtube_access.rb
-#     get back info on video
-#     send info to comment_generator
-#     get nicely formatted comment string back, or nil
-#     post comment to link page on reddit
-#     add link to already_commented, remove last (or oldest?) item from queue
-#   end for
-#   remove posts from queue that are older than 24 hours (manages size)
-
-
 
 

@@ -32,6 +32,7 @@ class YouTubeAccess
   # get info about video using YouTube API
   def get_video_info(video_url)
     video_id = isolate_id video_url
+    return nil if video_id.nil?
     response = @client.execute!(
       api_method: @access.videos.list,
       parameters: {
@@ -47,7 +48,8 @@ class YouTubeAccess
   # helper method to isolate unique video id from URL
   def isolate_id(video_url)
     video_id = video_url[/[\?&]v=.{11}/]
-    video_id = video_id[3..-1]
+    video_id = video_id[3..-1] unless video_id.nil?
+    video_id
   end
 
 end

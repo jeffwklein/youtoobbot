@@ -5,6 +5,7 @@
 require 'redditkit'
 require './youtube_access'
 require './comment_generator'
+require './comment_parser'
 
 ###
 # Wait-time Constants
@@ -13,8 +14,8 @@ SECONDS_BETWEEN_COMMENTS = 5
 SECONDS_BEFORE_RETRY = 20
 
 # establish username and password
-username = "YouToobBot"
-username = "YouToobBot_Test" if ARGV[0] == "test"
+username = "vid-info"
+username = "vid-info-test" if ARGV[0] == "test"
 password = "csci4330"
 
 # sign in to bot's account

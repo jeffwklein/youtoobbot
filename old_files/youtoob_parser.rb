@@ -1,5 +1,5 @@
 #require 'rubygems'
-require 'fast-stemmer'
+#require 'fast-stemmer'
 require 'open-uri'
  
 module YoutoobParser
@@ -58,6 +58,11 @@ module YoutoobParser
 
   private
 
+  # strip description of HTML tags
+  def self.strip_tags
+    # TODO
+  end
+
   # helper method to format YouTube's duration string format into mm:ss form
   def self.format_duration(string)
     string.gsub!(/[PTMS]/, "PT" => "", "M" => ":", "S" => "")
@@ -68,7 +73,7 @@ module YoutoobParser
 
 end
 
-# test parser and stemmer (REMOVE LATER)
+###
+# Test the parser (REMOVE LATER)
 yp = YoutoobParser.extract_data "https://www.youtube.com/watch?v=-vE04u94h0Y"
-run = 'running'.stem
-print run
+

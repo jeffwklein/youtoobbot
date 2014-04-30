@@ -99,8 +99,8 @@ function print_start_screen($keys_str) {
 				<H4 align=center>Sort By</H4>
 				<table align=center>
 					<tr align=left><td><input name=sort value='title' type='radio' checked>Title A-Z</input></td></tr>
-					<tr align=left><td><input name=sort value='view' type='radio'>Youtube View Count</input></td></tr>
-					<tr align=left><td><input name=sort value='vote' type='radio'>Reddit Vote Count</input></td></tr>
+					<tr align=left><td><input name=sort value='views' type='radio'>Youtube View Count</input></td></tr>
+					<tr align=left><td><input name=sort value='votes' type='radio'>Reddit Vote Count</input></td></tr>
 				</table>
 				<BR>
 				<button type=submit class='btn btn-success btn-lg' align='center'>Search</button>

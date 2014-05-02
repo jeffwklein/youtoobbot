@@ -15,7 +15,7 @@ csv = File.new("#{ARGV[0]}.csv","w")
 HundredsOfPosts = 100
 BotUsername = "vid-info"
 BotPassword = "csci4330"
-#
+###
 
 RedditKit.sign_in BotUsername, BotPassword
 

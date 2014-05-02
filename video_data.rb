@@ -35,8 +35,7 @@ class VideoData
       @stems += add_title
     end
     @stems.uniq!
-    @stems.each { |word| Stemmer::stem_word(word) }
-    @keywords = @stems.sort.join(" ")
+    @keywords = @stems.map { |word| Stemmer::stem_word(word) }.sort.join(" ")
   end
 
   private

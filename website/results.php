@@ -1,5 +1,38 @@
 <?php
 
+include 'stemmer.php';
+
+$sort = $_GET['sort'];
+
+$keyword_keys = array_keys($_GET);
+array_pop($keyword_keys);
+
+sort($keyword_keys);
+
+$bool_array = array();
+
+$half = count($keyword_keys)/2;
+for($i=0; $i<$half-1; $i++){
+	$bool_array[$i] = array_shift($keyword_keys);
+}
+
+foreach ($keyword_keys as $the_key){
+	if(preg_match('/ /', $_GET[$the_key]) ||  $_GET[$the_key] == ''){
+		$url = "http://128.192.99.232/youtoobbot/index.php";
+		$post_str = "fail=1";
+
+		$ch = curl_init();
+
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $post_str);
+
+		$result = curl_exec($ch);
+		curl_close($ch);
+		exit;
+	}
+}
+
 print "
 	<!DOCTYPE html>
 		<head>
@@ -12,28 +45,14 @@ print "
 			<p>$stm</p>
 			<table class='table' style='width:600px;'>";
 
-$sort = $_GET['sort'];
-
-$keyword_keys = array_keys($_GET);
-array_pop($keyword_keys);
-
-sort($keyword_keys);
-
-$bool_array = array();
-
-
-$half = count($keyword_keys)/2;
-for($i=0; $i<$half-1; $i++){
-	$bool_array[$i] = array_shift($keyword_keys);
-}
-
 $stm = "Select * From yt_data Where ";
 
 for($j=0; $j<count($keyword_keys); $j++){
-	$keyword = $_GET[$keyword_keys[$j]];
+	$word    = $_GET[$keyword_keys[$j]];
+	$keyword = PorterStemmer::Stem($word);
 	if($_GET[$bool_array[$j]]) $bool    = $_GET[$bool_array[$j]];
 	else $bool = '';
-	$stm .= "keywords like '%$keyword%' $bool ";
+	$stm .= "(keywords like '% $keyword %' or keywords like '$keyword %')  $bool ";
 }
 
 $stm = rtrim($stm," AND");
@@ -63,11 +82,11 @@ while($sth->fetch()){
 				<td align=left>
 					<a href='$url'><H3>$title</H3></a>	
 					<ul style='list-style-type: none;'>
-						<li><a href='$post_url'>Reddit Post</a></li>
-						<li>Youtube Views - $views</li>
-						<li>Reddit Votes  - $votes</li>
-						<li>Keywords - $keywords</li>
-						<li>$date</li>
+						<li><a href='$post_url'><b>Reddit Post</b></a></li>
+						<li><b>Youtube Views</b> - $views</li>
+						<li><b>Reddit Votes</b>  - $votes</li>
+						<li><b>Keywords</b> - $keywords</li>
+						<li><b>$date</b></li>
 					</ul>
 				</td>
 			</tr>";

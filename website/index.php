@@ -1,5 +1,7 @@
 <?php 
 
+
+
 $array = get_keywords();
 $keys_str = '';
 foreach ($array as $key) {
@@ -7,7 +9,7 @@ foreach ($array as $key) {
 }		
 
 
-print_start_screen($keys_str);
+print_start_screen($_POST['fail']);
 
 function get_keywords(){
 	
@@ -30,7 +32,7 @@ function get_keywords(){
 	return $array;
 }
 
-function print_start_screen($keys_str) {
+function print_start_screen($alert) {
 	print "
 	<!DOCTYPE html>
 	<head>
@@ -48,13 +50,12 @@ function print_start_screen($keys_str) {
 
 				var options = \"$keys_str\"; 
 
-				cell1.innerHTML = \"<select class='form-control' name=\" + name_s + \" >\" + options + \"</select>\";
+				cell1.innerHTML = \"<input type=text class='form-control' name=\" + name_s + \"/>\";
 				cell2.innerHTML = \"<select class='form-control' name=\" + bool_s + \" id ='\" + bool_s + \"' disabled><option value='OR'>OR</option><option value='AND'>AND</option></select>\";
 				
 				var id = \"bool\" + (tot-1);
 				document.getElementById(id).disabled=false;
 			}
-
 			function del_row() {
 				var myTable = document.getElementById('mytable');
 				if(myTable.rows.length > 2){	
@@ -71,6 +72,11 @@ function print_start_screen($keys_str) {
 
 			</script>
 	</head>
+	";
+	if($alert){
+		print "<script>alert('Must have only one word per text box, but atleast one')</script>";
+	}
+	print "
 	<center>
 		<div class='jumbotron' align=center>
 			<H1 align=center>Boolean Reddit Youtoobbot Search</H1>
@@ -82,8 +88,8 @@ function print_start_screen($keys_str) {
 					</tr>
 					<tr>
 						<td>
-							<select class='form-control' name=key1>$keys_str	
-							</select>
+							<input class='form-control' name=key1 type=text>	
+							</input>
 						</td>
 						<td>
 							<select class='form-control' name=bool1 id='bool1' disabled>

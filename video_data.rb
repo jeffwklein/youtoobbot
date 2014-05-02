@@ -12,6 +12,7 @@ class VideoData
     @post_url = reddit_post.permalink
     @date = reddit_post.created_at.strftime("%F %H:%M:%S")
     @votes = reddit_post.score
+    @votes = 0 if @votes == nil
 
     @url = reddit_post.url
     begin
@@ -22,22 +23,20 @@ class VideoData
     @title = safe_match(/<title>(.*?)<\/title>/, source_str)
     @pic = safe_match(/<link itemprop="thumbnailUrl" href="(.*?)">/, source_str)
     @views = safe_match(/<span class="watch-view-count " >\n *(.*?)\n/, source_str).gsub(/,/,"")
+    @views = 0 if @views == ""
     # tags, category, vid title; all stemmed.
     @stems = safe_match(/"keywords": "(.*?)",/, source_str)
     @stems = format_stems(@stems)
-    category = safe_match(/<p id="eow-category"><a.*>(.*?)<\/a>/, source_str)
+    category = safe_match(/<p id="eow-category"><a.*?>(.*?)<\/a>/, source_str)
     if (add_category = format_stems(category)) != nil
       @stems += add_category
     end
     if (add_title = format_stems(@title)) != nil
       @stems += add_title
     end
+    @stems.uniq!
     @stems.each { |word| Stemmer::stem_word(word) }
     @keywords = @stems.sort.join(" ")
-    # Next to do with database access object:
-    #   2.  add new stems in table
-    #   3.  add instance in other table using data from instance of this class
-    #
   end
 
   private

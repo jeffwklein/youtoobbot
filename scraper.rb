@@ -12,7 +12,7 @@ end
 csv = File.new("#{ARGV[0]}.csv","w")
 
 # Constants
-HundredsOfPosts = 3
+HundredsOfPosts = 100
 BotUsername = "vid-info"
 BotPassword = "csci4330"
 #
@@ -42,7 +42,11 @@ HundredsOfPosts.times do |i|
     newline += "\"#{vd.pic}\",\"#{vd.keywords}\",\"#{vd.views}\",\"#{vd.votes}\""
     csv.puts newline
   end
-  puts "Completed posts #{i*100} - #{(i+1)*100-1}. Latest score: #{links_list.to_a.last.score}. Latest post: #{links_list.to_a.last.permalink}"
+  begin
+    puts "Completed posts #{i*100} - #{(i+1)*100-1}. Latest score: #{links_list.to_a.last.score}. Latest post: #{links_list.to_a.last.permalink}"
+  rescue
+    puts "Completed posts #{i*100} - #{(i+1)*100-1}."
+  end
   begin
     links_list = RedditKit.links(
       "videos",

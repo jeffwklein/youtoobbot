@@ -11,7 +11,7 @@ class VideoData
   def initialize(reddit_post)
     @post_url = reddit_post.permalink
     @date = reddit_post.created_at.strftime("%F %H:%M:%S")
-    @reddit_post = reddit_post.score
+    @votes = reddit_post.score
 
     @url = reddit_post.url
     begin
@@ -21,7 +21,7 @@ class VideoData
     end
     @title = safe_match(/<title>(.*?)<\/title>/, source_str)
     @pic = safe_match(/<link itemprop="thumbnailUrl" href="(.*?)">/, source_str)
-    @views = safe_match(/<span class="watch-view-count " >\n *(.*?)\n/, source_str).gsub(/[^\d]/,"")
+    @views = safe_match(/<span class="watch-view-count " >\n *(.*?)\n/, source_str).gsub(/,/,"")
     # tags, category, vid title; all stemmed.
     @stems = safe_match(/"keywords": "(.*?)",/, source_str)
     @stems = format_stems(@stems)
